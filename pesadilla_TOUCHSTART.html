@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asignación Asalto Pesadilla</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+            font-family: 'Orbitron', monospace;
+            min-height: 100vh;
+            padding: 15px;
+            color: #fff;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .title {
+            text-align: center;
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            font-weight: 900;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #00f5ff, #ff00ff, #00ff41);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientShift 3s ease-in-out infinite;
+        }
+        
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        .hint {
+            background: rgba(255, 215, 0, 0.15);
+            color: #ffd700;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+            border: 2px solid rgba(255, 215, 0, 0.4);
+            font-weight: 600;
+        }
+        
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .action-btn {
+            display: inline-block;
+            padding: 25px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: text;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        
+        .capture-btn {
+            background: linear-gradient(135deg, #00ff41, #00cc33);
+            color: #000;
+            box-shadow: 0 5px 20px rgba(0, 255, 65, 0.6);
+        }
+        
+        .save-btn {
+            background: linear-gradient(135deg, #00f5ff, #0099cc);
+            color: #000;
+            box-shadow: 0 5px 20px rgba(0, 245, 255, 0.6);
+        }
+        
+        .reset-btn {
+            background: linear-gradient(135deg, #ff00ff, #cc0099);
+            color: #fff;
+            box-shadow: 0 5px 20px rgba(255, 0, 255, 0.6);
+        }
+        
+        .groups-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .groups-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .group-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .group1 {
+            box-shadow: 0 0 30px rgba(0, 245, 255, 0.3);
+        }
+        
+        .group2 {
+            box-shadow: 0 0 30px rgba(255, 0, 255, 0.3);
+        }
+        
+        .group-title {
+            font-size: clamp(1.3rem, 4vw, 1.8rem);
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .group1 .group-title {
+            background: linear-gradient(45deg, #00f5ff, #0077be);
+            color: #000;
+        }
+        
+        .group2 .group-title {
+            background: linear-gradient(45deg, #ff00ff, #8b008b);
+            color: #fff;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        th {
+            padding: 15px 10px;
+            font-weight: 700;
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            text-transform: uppercase;
+        }
+        
+        .group1 th {
+            background: linear-gradient(45deg, #00f5ff, #0099cc);
+            color: #000;
+        }
+        
+        .group2 th {
+            background: linear-gradient(45deg, #ff00ff, #cc0099);
+            color: #fff;
+        }
+        
+        td {
+            padding: 15px 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+        
+        .line-number {
+            font-weight: 700;
+            font-size: clamp(1rem, 3vw, 1.3rem);
+            width: 80px;
+        }
+        
+        .group1 .line-number {
+            color: #00f5ff;
+            text-shadow: 0 0 10px #00f5ff;
+        }
+        
+        .group2 .line-number {
+            color: #ff00ff;
+            text-shadow: 0 0 10px #ff00ff;
+        }
+        
+        .players {
+            text-align: left;
+            padding-left: 15px;
+        }
+        
+        .player-name {
+            display: inline-block;
+            margin: 5px 5px;
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: text;
+            border: 2px solid transparent;
+            min-width: 80px;
+        }
+        
+        .player-name:focus {
+            background: #ffffff;
+            color: #000000;
+            border-color: #00f5ff;
+            outline: none;
+        }
+        
+        #message {
+            text-align: center;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-weight: 700;
+            display: none;
+        }
+        
+        #message.show {
+            display: block;
+        }
+        
+        #message.success {
+            background: rgba(0, 255, 65, 0.25);
+            color: #00ff41;
+            border: 2px solid rgba(0, 255, 65, 0.6);
+        }
+        
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 9999;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .overlay.show {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .overlay img {
+            max-width: 90%;
+            max-height: 70vh;
+            border: 3px solid #00ff41;
+            border-radius: 10px;
+        }
+        
+        .overlay-instructions {
+            background: #00ff41;
+            color: #000;
+            padding: 20px;
+            border-radius: 10px;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 16px;
+        }
+        
+        .close-overlay {
+            display: inline-block;
+            background: #ff00ff;
+            color: #fff;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-weight: bold;
+            margin-top: 20px;
+            font-size: 18px;
+            cursor: text;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">🎮 ASIGNACIÓN ASALTO PESADILLA 🎮</h1>
+        
+        <div class="hint">
+            ✏️ <strong>TOCA LOS BOTONES VERDES O LOS NOMBRES PARA EDITAR</strong>
+        </div>
+        
+        <div id="message"></div>
+        
+        <div class="action-buttons">
+            <span class="action-btn capture-btn" id="captureBtn">📸 CAPTURAR IMAGEN</span>
+            <span class="action-btn save-btn" id="saveBtn">💾 GUARDAR HTML</span>
+            <span class="action-btn reset-btn" id="resetBtn">🔄 RESTAURAR ORIGINALES</span>
+        </div>
+        
+        <div class="groups-container">
+            <div class="group-section group1">
+                <div class="group-title">⚔️ GRUPO 1 ⚔️</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="line-number">LÍNEA</th>
+                            <th>JUGADORES</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="line-number">01</td>
+                            <td class="players">
+                                <span class="player-name" contenteditable="true" data-original="TAL">TAL</span>
+                                <span class="player-name" contenteditable="true" data-original="LORD_AYLOST">LORD_AYLOST</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="line-number">02</td>
+                            <td class="players">
+                                <span class="player-name" contenteditable="true" data-original="ROBERT">ROBERT</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="line-number">03</td>
+                            <td class="players">
+                                <span class="player-name" contenteditable="true" data-original="RETHYKUS">RETHYKUS</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="line-number">04</td>
+                            <td class="players">
+                                <span class="player-name" contenteditable="true" data-original="NEFERTITI">NEFERTITI</span>
+                                <span class="player-name" contenteditable="true" data-original="RIOKO">RIOKO</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="line-number">05</td>
+                            <td class="players">
+                                <span class="player-name" contenteditable="true" data-original="JOSE">JOSE</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="line-number">06</td>
+                            <td class="players">
+                                <span class="player-name" contenteditable="true" data-original="THUND">THUND</span>
+                                <span class="player-name" contenteditable="true" data-original="ZEUS">ZEUS</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="line-number">07</td>
+                            <td class="players">
+                                <span class="player-name" contenteditable="true" data-original="PESTANIUS">PESTANIUS</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="line-number">08</td>
+                            <td class="players">
+                                <span class="player-name" contenteditable="true" data-original="CRISARG">CRISARG</span>
+                                <span class="player-name" contenteditable="true" data-original="ROCOSO">ROCOSO</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="line-number">09</td>
+                            <td class="players">
+                                <span class="player-name" contenteditable="true" data-original="DOMLEVOIX">DOMLEVOIX</span>
+                                <span class="player-name" contenteditable="true" data-original="JIMGABALE">JIMGABALE</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="group-section group2">
+                <div class="group-title">🛡️ GRUPO 2 🛡️</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="line-number">LÍNEA</th>
+                            <th>JUGADORES</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="line-number">01</td>
+                            <td class="players">
+                                <span class="player-name" contenteditable="true" data-original="RYAN">RYAN</span>
+                                <span class="player-name" contenteditable="true" data-original="PETRUS_NIGHTMARE">PETRUS_NIGHTMARE</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="line-number">02</td>
+                            <td class="players">
+                                <span class="player-name" contenteditable="true" data-original="MERLIN">MERLIN</span>
+                                <span class="player-name" contenteditable="true" data-original="KO">KO</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="line-number">03</td>
+                            <td class="players">
+                                <span class="player-name" contenteditable="true" data-original="MIRACLES">MIRACLES</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="line-number">04</td>
+                            <td class="players">
+                                <span class="player-name" contenteditable="true" data-original="NETERO">NETERO</span>
+                                <span class="player-name" contenteditable="true" data-original="JOK">JOK</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="line-number">05</td>
+                            <td class="players">
+                                <span class="player-name" contenteditable="true" data-original="BISPO666">BISPO666</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="line-number">06</td>
+                            <td class="players">
+                                <span class="player-name" contenteditable="true" data-original="PABLOZETH">PABLOZETH</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="line-number">07</td>
+                            <td class="players">
+                                <span class="player-name" contenteditable="true" data-original="EDWING">EDWING</span>
+                                <span class="player-name" contenteditable="true" data-original="DUKE">DUKE</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="line-number">08</td>
+                            <td class="players">
+                                <span class="player-name" contenteditable="true" data-original="KLAUSSLUNA">KLAUSSLUNA</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="line-number">09</td>
+                            <td class="players">
+                                <span class="player-name" contenteditable="true" data-original="MOSCAS">MOSCAS</span>
+                                <span class="player-name" contenteditable="true" data-original="SHADOW_SAM">SHADOW_SAM</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- OVERLAY -->
+    <div class="overlay" id="overlay">
+        <img id="capturedImage" src="">
+        <div class="overlay-instructions">
+            📱 MANTENÉ PRESIONADA LA IMAGEN Y SELECCIONÁ "GUARDAR IMAGEN"
+        </div>
+        <span class="close-overlay" id="closeOverlay">✖ CERRAR</span>
+    </div>
+
+    <script>
+        const captureBtn = document.getElementById('captureBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const message = document.getElementById('message');
+        const overlay = document.getElementById('overlay');
+        const capturedImage = document.getElementById('capturedImage');
+        const closeOverlay = document.getElementById('closeOverlay');
+        
+        const originalCaptureText = '📸 CAPTURAR IMAGEN';
+        const originalSaveText = '💾 GUARDAR HTML';
+        const originalResetText = '🔄 RESTAURAR ORIGINALES';
+        
+        function showMessage(text) {
+            message.textContent = text;
+            message.className = 'show success';
+            setTimeout(() => {
+                message.classList.remove('show');
+            }, 3000);
+        }
+        
+        // DETECTAR TOUCH EN LOS BOTONES Y EJECUTAR ACCIÓN
+        captureBtn.addEventListener('touchstart', function(e) {
+            e.preventDefault(); // Evita que se active contenteditable
+            captureImage();
+        });
+        
+        captureBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            captureImage();
+        });
+        
+        saveBtn.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            saveHTML();
+        });
+        
+        saveBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            saveHTML();
+        });
+        
+        resetBtn.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            resetNames();
+        });
+        
+        resetBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            resetNames();
+        });
+        
+        closeOverlay.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            overlay.classList.remove('show');
+        });
+        
+        closeOverlay.addEventListener('click', function(e) {
+            e.preventDefault();
+            overlay.classList.remove('show');
+        });
+        
+        function captureImage() {
+            captureBtn.textContent = '📸 CAPTURANDO...';
+            
+            const hint = document.querySelector('.hint');
+            const buttons = document.querySelector('.action-buttons');
+            
+            hint.style.display = 'none';
+            buttons.style.display = 'none';
+            message.style.display = 'none';
+            
+            setTimeout(function() {
+                domtoimage.toPng(document.body, {
+                    quality: 0.95,
+                    bgcolor: '#0c0c0c'
+                })
+                .then(function(dataUrl) {
+                    hint.style.display = '';
+                    buttons.style.display = '';
+                    captureBtn.textContent = originalCaptureText;
+                    
+                    capturedImage.src = dataUrl;
+                    overlay.classList.add('show');
+                    
+                    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                    if (!isMobile) {
+                        const a = document.createElement('a');
+                        const date = new Date().toISOString().slice(0,10).replace(/-/g,'');
+                        a.download = 'pesadilla_' + date + '.png';
+                        a.href = dataUrl;
+                        a.click();
+                    }
+                })
+                .catch(function(error) {
+                    hint.style.display = '';
+                    buttons.style.display = '';
+                    captureBtn.textContent = originalCaptureText;
+                    alert('ERROR: ' + error.message);
+                });
+            }, 500);
+        }
+        
+        function saveHTML() {
+            const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+            const blob = new Blob([html], {type: 'text/html;charset=utf-8'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const date = new Date().toISOString().slice(0,10).replace(/-/g,'');
+            a.download = 'pesadilla_' + date + '.html';
+            a.href = url;
+            a.click();
+            URL.revokeObjectURL(url);
+            showMessage('✅ HTML GUARDADO!');
+        }
+        
+        function resetNames() {
+            if (confirm('¿Restaurar todos los nombres originales?')) {
+                document.querySelectorAll('.player-name').forEach(player => {
+                    player.textContent = player.getAttribute('data-original');
+                });
+                showMessage('✅ NOMBRES RESTAURADOS!');
+            }
+        }
+    </script>
+</body>
+</html>
